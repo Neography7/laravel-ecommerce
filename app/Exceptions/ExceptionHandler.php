@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Exception;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Exceptions\Handler as BaseExceptionHandler;
@@ -60,6 +61,11 @@ class ExceptionHandler extends BaseExceptionHandler
      */
     protected function handleApiException(Throwable $exception): JsonResponse
     {
+        // AuthenticationException hatalarını ele al
+        if ($exception instanceof AuthenticationException) {
+            return apiError('Unauthenticated.', [], 401);
+        }
+
         // ValidationException hatalarını ele al
         if ($exception instanceof ValidationException) {
             return apiError('Validasyon hatası', $exception->errors(), 422);
