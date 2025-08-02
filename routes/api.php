@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProfileController;
 use Illuminate\Http\Request;
@@ -31,6 +32,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/cart/update', [CartController::class, 'update']);
     Route::delete('/cart/remove/{product}', [CartController::class, 'remove']);
     Route::delete('/cart/clear', [CartController::class, 'clear']);
+
+    // Sipariş yönetimi
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::post('/orders', [OrderController::class, 'store']);
+    Route::get('/orders/{order}', [OrderController::class, 'show']);
 
     // Admin yetkisi olan kullanıcılar için rotalar
     Route::middleware('admin')->group(function () {
