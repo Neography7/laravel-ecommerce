@@ -145,9 +145,6 @@ class OrderController extends Controller
                     'quantity' => $cartItem->quantity,
                     'price' => $product->price, // Sipariş anındaki güncel fiyatı kullan
                 ]);
-
-                // Stok azalt
-                $product->decrement('stock_quantity', $cartItem->quantity);
             }
 
             // Sepeti temizle
