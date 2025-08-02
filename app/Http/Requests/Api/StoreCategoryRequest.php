@@ -4,6 +4,12 @@ namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Kategori Oluşturma İsteği
+ *
+ * @property string $name Kategori adı (minimum 3 karakter)
+ * @property string|null $description Kategori açıklaması
+ */
 class StoreCategoryRequest extends FormRequest
 {
     /**

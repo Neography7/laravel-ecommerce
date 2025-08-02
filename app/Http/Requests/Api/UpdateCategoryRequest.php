@@ -5,6 +5,12 @@ namespace App\Http\Requests\Api;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/**
+ * Kategori Güncelleme İsteği
+ *
+ * @property string $name Kategori adı (minimum 3 karakter)
+ * @property string|null $description Kategori açıklaması
+ */
 class UpdateCategoryRequest extends FormRequest
 {
     /**
