@@ -51,4 +51,63 @@ class Product extends Model
     {
         return $this->order_items_sum_quantity ?: 0;
     }
+
+    /**
+     * Ürün adında arama yap
+     */
+    public function scopeSearch($query, $search)
+    {
+        if ($search) {
+            return $query->where('name', 'LIKE', "%{$search}%")
+                ->orWhere('description', 'LIKE', "%{$search}%");
+        }
+        return $query;
+    }
+    /**
+     * Kategoriye göre filtreleme
+     */
+    public function scopeByCategory($query, $categoryId)
+    {
+        if ($categoryId) {
+            return $query->where('category_id', $categoryId);
+        }
+        return $query;
+    }
+
+    /**
+     * Fiyat aralığına göre filtreleme
+     */
+    public function scopePriceRange($query, $minPrice = null, $maxPrice = null)
+    {
+        if ($minPrice !== null) {
+            $query->where('price', '>=', $minPrice);
+        }
+        if ($maxPrice !== null) {
+            $query->where('price', '<=', $maxPrice);
+        }
+        return $query;
+    }
+
+    /**
+     * Stokta olan ürünler
+     */
+    public function scopeInStock($query)
+    {
+        return $query->where('stock_quantity', '>', 0);
+    }
+
+    /**
+     * Sıralama scope'u
+     */
+    public function scopeSortBy($query, $sortBy = 'name', $sortOrder = 'asc')
+    {
+        $allowedSorts = ['name', 'price', 'created_at', 'stock_quantity'];
+        $allowedOrders = ['asc', 'desc'];
+
+        if (in_array($sortBy, $allowedSorts) && in_array($sortOrder, $allowedOrders)) {
+            return $query->orderBy($sortBy, $sortOrder);
+        }
+
+        return $query->orderBy('name', 'asc');
+    }
 }

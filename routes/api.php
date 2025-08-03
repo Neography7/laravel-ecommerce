@@ -10,22 +10,13 @@ use App\Http\Controllers\Api\DashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// Authentication rotaları - dakikada 10 istek
-Route::middleware(['throttle:10,1'])->group(
-    function () {
-        Route::post('/register', [AuthController::class, 'register']);
-        Route::post('/login', [AuthController::class, 'login']);
-    }
-);
-
-// Kategori ve Ürün rotaları - dakikada 60 istek
+// Herkese açık rotalar - dakikada 60 istek
 Route::middleware(['throttle:60,1'])->group(function () {
+    // Auth rotaları
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
 
-    // Kategori rotaları
-    Route::get('/categories', [CategoryController::class, 'index']);
-    Route::get('/categories/{category}', [CategoryController::class, 'show']);
-
-    // Ürün rotaları
+    // Ürün rotaları (misafir erişimi)
     Route::get('/products', [ProductController::class, 'index']);
     Route::get('/products/{product}', [ProductController::class, 'show']);
 });
