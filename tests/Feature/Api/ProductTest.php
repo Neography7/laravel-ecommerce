@@ -136,7 +136,6 @@ test('admin can create product', function () {
 
 test('normal user cannot create product', function () {
     $user = User::factory()->create();
-    $user->assignRole('user');
     $category = Category::factory()->create();
 
     $productData = [
@@ -288,7 +287,6 @@ test('admin can update product', function () {
 
 test('normal user cannot update product', function () {
     $user = User::factory()->create();
-    $user->assignRole('user');
     $category = Category::factory()->create();
     $product = Product::factory()->create(['category_id' => $category->id]);
 
@@ -326,7 +324,6 @@ test('admin can delete product', function () {
 
 test('normal user cannot delete product', function () {
     $user = User::factory()->create();
-    $user->assignRole('user');
     $category = Category::factory()->create();
     $product = Product::factory()->create(['category_id' => $category->id]);
 

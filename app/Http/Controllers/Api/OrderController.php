@@ -114,9 +114,7 @@ class OrderController extends Controller
         $cart = Cart::with('items.product')->where('user_id', $user->id)->first();
 
         if (!$cart || $cart->items->isEmpty()) {
-            return response()->json([
-                'message' => 'Sepetinizde ürün bulunmuyor.',
-            ], 400);
+            return apiError('Sepetinizde ürün bulunmuyor.', [], 400);
         }
 
         DB::beginTransaction();
@@ -157,9 +155,11 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return response()->json([
-                'message' => 'Sipariş oluşturulurken bir hata oluştu: ' . $e->getMessage(),
-            ], 400);
+            return apiError(
+                'Sipariş oluşturulurken bir hata oluştu: ' . $e->getMessage(),
+                [],
+                400
+            );
         }
     }
 

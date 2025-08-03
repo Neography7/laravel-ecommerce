@@ -27,4 +27,28 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * En çok satılan ürünleri getir
+     */
+    public function scopeTopSelling($query, $limit = 5)
+    {
+        return $query->select('id', 'name')
+            ->withSum('orderItems', 'quantity')
+            ->orderByDesc('order_items_sum_quantity')
+            ->limit($limit);
+    }
+
+    /**
+     * Toplam satış miktarı accessor
+     */
+    public function getTotalSoldAttribute(): int
+    {
+        return $this->order_items_sum_quantity ?: 0;
+    }
 }

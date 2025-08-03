@@ -114,7 +114,6 @@ test('admin can create category', function () {
 
 test('normal user cannot create category', function () {
     $user = User::factory()->create();
-    $user->assignRole('user');
 
     $categoryData = [
         'name' => fake()->words(2, true),
@@ -203,7 +202,6 @@ test('admin can update category', function () {
 
 test('normal user cannot update category', function () {
     $user = User::factory()->create();
-    $user->assignRole('user');
 
     $category = Category::factory()->create();
 
@@ -241,7 +239,6 @@ test('admin can delete category', function () {
 
 test('normal user cannot delete category', function () {
     $user = User::factory()->create();
-    $user->assignRole('user');
 
     $category = Category::factory()->create();
 

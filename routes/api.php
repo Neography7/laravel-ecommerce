@@ -6,23 +6,34 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\DashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// Authentication rotaları
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+// Authentication rotaları - dakikada 10 istek
+Route::middleware(['throttle:10,1'])->group(
+    function () {
+        Route::post('/register', [AuthController::class, 'register']);
+        Route::post('/login', [AuthController::class, 'login']);
+    }
+);
 
-// Kategori rotaları
-Route::get('/categories', [CategoryController::class, 'index']);
-Route::get('/categories/{category}', [CategoryController::class, 'show']);
+// Kategori ve Ürün rotaları - dakikada 60 istek
+Route::middleware(['throttle:60,1'])->group(function () {
 
-// Ürün rotaları
-Route::get('/products', [ProductController::class, 'index']);
-Route::get('/products/{product}', [ProductController::class, 'show']);
+    // Kategori rotaları
+    Route::get('/categories', [CategoryController::class, 'index']);
+    Route::get('/categories/{category}', [CategoryController::class, 'show']);
 
-// Giriş yapmış kullanıcılar için rotalar
-Route::middleware('auth:sanctum')->group(function () {
+    // Ürün rotaları
+    Route::get('/products', [ProductController::class, 'index']);
+    Route::get('/products/{product}', [ProductController::class, 'show']);
+});
+
+// Giriş yapmış kullanıcılar için rotalar - dakikada 100 istek
+Route::middleware(['auth:sanctum', 'throttle:100,1'])->group(function () {
+
+    // Profil rotaları
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
 
@@ -38,8 +49,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/orders/{order}', [OrderController::class, 'show']);
 
-    // Admin yetkisi olan kullanıcılar için rotalar
-    Route::middleware('admin')->group(function () {
+    // Admin yetkisi olan kullanıcılar için rotalar - dakikada 200 istek
+    Route::middleware(['admin', 'throttle:200,1'])->group(function () {
 
         // Kategori
         Route::post('/categories', [CategoryController::class, 'store']);
@@ -50,5 +61,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/products', [ProductController::class, 'store']);
         Route::put('/products/{product}', [ProductController::class, 'update']);
         Route::delete('/products/{product}', [ProductController::class, 'destroy']);
+
+        // Admin Dashboard
+        Route::get('/dashboard', [DashboardController::class, 'index']);
     });
 });
