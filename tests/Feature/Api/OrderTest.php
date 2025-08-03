@@ -247,3 +247,215 @@ test('order status methods work correctly', function () {
     expect($order->isCancelled())->toBeTrue();
     expect($order->isCompleted())->toBeFalse();
 });
+
+// Admin sipariş durumu güncelleme testleri
+test('admin can update order status', function () {
+    // Test için roller ve kullanıcıları oluştur
+    $this->artisan('db:seed', ['--class' => 'RoleSeeder']);
+
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    $order = Order::factory()->create([
+        'user_id' => $this->user->id,
+        'status' => 'pending',
+    ]);
+
+    $response = $this->actingAs($admin, 'sanctum')
+        ->putJson("/api/orders/{$order->id}/status", [
+            'status' => 'shipped',
+        ]);
+
+    $response->assertStatus(200)
+        ->assertJsonStructure([
+            'success',
+            'message',
+            'data' => [
+                'id',
+                'status',
+                'status_label',
+                'updated_at',
+            ]
+        ])
+        ->assertJson([
+            'success' => true,
+            'message' => 'Sipariş durumu başarıyla güncellendi',
+            'data' => [
+                'status' => 'shipped',
+                'status_label' => 'Kargoya Verildi',
+            ]
+        ]);
+
+    // Verify database was updated
+    $this->assertDatabaseHas('orders', [
+        'id' => $order->id,
+        'status' => 'shipped',
+    ]);
+});
+
+test('admin can update order status to all valid statuses', function () {
+    $this->artisan('db:seed', ['--class' => 'RoleSeeder']);
+
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    // Test progressive status updates
+    $statusProgression = [
+        ['from' => 'pending', 'to' => 'processing', 'label' => 'İşleniyor'],
+        ['from' => 'processing', 'to' => 'shipped', 'label' => 'Kargoya Verildi'],
+        ['from' => 'shipped', 'to' => 'delivered', 'label' => 'Teslim Edildi'],
+    ];
+
+    foreach ($statusProgression as $progression) {
+        $order = Order::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => $progression['from'],
+        ]);
+
+        $response = $this->actingAs($admin, 'sanctum')
+            ->putJson("/api/orders/{$order->id}/status", [
+                'status' => $progression['to'],
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.status', $progression['to'])
+            ->assertJsonPath('data.status_label', $progression['label']);
+
+        $this->assertDatabaseHas('orders', [
+            'id' => $order->id,
+            'status' => $progression['to'],
+        ]);
+    }
+
+    // Test cancellation from pending and processing
+    $cancellationTests = ['pending', 'processing', 'shipped'];
+    foreach ($cancellationTests as $fromStatus) {
+        $order = Order::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => $fromStatus,
+        ]);
+
+        $response = $this->actingAs($admin, 'sanctum')
+            ->putJson("/api/orders/{$order->id}/status", [
+                'status' => 'cancelled',
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.status', 'cancelled')
+            ->assertJsonPath('data.status_label', 'İptal Edildi');
+    }
+});
+
+test('admin cannot update order with invalid status', function () {
+    $this->artisan('db:seed', ['--class' => 'RoleSeeder']);
+
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    $order = Order::factory()->create([
+        'user_id' => $this->user->id,
+        'status' => 'pending',
+    ]);
+
+    $response = $this->actingAs($admin, 'sanctum')
+        ->putJson("/api/orders/{$order->id}/status", [
+            'status' => 'invalid_status',
+        ]);
+
+    $response->assertStatus(422)
+        ->assertJsonValidationErrors(['status']);
+});
+
+test('normal user cannot update order status', function () {
+    $order = Order::factory()->create([
+        'user_id' => $this->user->id,
+        'status' => 'pending',
+    ]);
+
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->putJson("/api/orders/{$order->id}/status", [
+            'status' => 'shipped',
+        ]);
+
+    $response->assertStatus(403)
+        ->assertJson([
+            'success' => false,
+            'message' => 'Bu işlem için admin yetkisi gerekli.',
+        ]);
+});
+
+test('guest cannot update order status', function () {
+    $order = Order::factory()->create([
+        'user_id' => $this->user->id,
+        'status' => 'pending',
+    ]);
+
+    $response = $this->putJson("/api/orders/{$order->id}/status", [
+        'status' => 'shipped',
+    ]);
+
+    $response->assertStatus(401);
+});
+
+test('admin cannot update non-existent order status', function () {
+    $this->artisan('db:seed', ['--class' => 'RoleSeeder']);
+
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    $response = $this->actingAs($admin, 'sanctum')
+        ->putJson("/api/admin/orders/999/status", [
+            'status' => 'shipped',
+            'notes' => 'This should fail'
+        ]);
+
+    $response->assertStatus(404);
+});
+
+test('admin can view all orders', function () {
+    $this->artisan('db:seed', ['--class' => 'RoleSeeder']);
+
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    // Create orders for different users
+    $user1 = User::factory()->create();
+    $user2 = User::factory()->create();
+
+    Order::factory(3)->create(['user_id' => $user1->id]);
+    Order::factory(2)->create(['user_id' => $user2->id]);
+
+    $response = $this->actingAs($admin, 'sanctum')
+        ->getJson('/api/admin/orders');
+
+    $response->assertStatus(200)
+        ->assertJsonStructure([
+            'success',
+            'message',
+            'data' => [
+                'orders' => [
+                    '*' => [
+                        'id',
+                        'user_id',
+                        'total_amount',
+                        'status',
+                        'status_label',
+                        'total_items',
+                        'created_at',
+                        'updated_at',
+                    ]
+                ],
+                'pagination'
+            ]
+        ]);
+
+    $orders = $response->json('data.orders');
+    expect($orders)->toHaveCount(5); // 3 + 2 orders
+});
+
+test('normal user cannot view all orders', function () {
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->getJson('/api/admin/orders');
+
+    $response->assertStatus(403);
+});

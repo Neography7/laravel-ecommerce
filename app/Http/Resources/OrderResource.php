@@ -17,8 +17,16 @@ class OrderResource extends JsonResource
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
+            'user' => $this->whenLoaded('user', function () {
+                return [
+                    'id' => $this->user->id,
+                    'name' => $this->user->name,
+                    'email' => $this->user->email,
+                ];
+            }),
             'total_amount' => number_format($this->total_amount, 2),
             'status' => $this->status,
+            'status_label' => $this->status_label,
             'total_items' => $this->total_items,
             'order_items' => OrderItemResource::collection($this->whenLoaded('orderItems')),
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),

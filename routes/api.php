@@ -7,7 +7,6 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\DashboardController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Herkese açık rotalar - dakikada 60 istek
@@ -19,6 +18,10 @@ Route::middleware(['throttle:60,1'])->group(function () {
     // Ürün rotaları (misafir erişimi)
     Route::get('/products', [ProductController::class, 'index']);
     Route::get('/products/{product}', [ProductController::class, 'show']);
+
+    // Kategori rotaları (misafir erişimi)
+    Route::get('/categories', [CategoryController::class, 'index']);
+    Route::get('/categories/{category}', [CategoryController::class, 'show']);
 });
 
 // Giriş yapmış kullanıcılar için rotalar - dakikada 100 istek
@@ -55,5 +58,9 @@ Route::middleware(['auth:sanctum', 'throttle:100,1'])->group(function () {
 
         // Admin Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index']);
+
+        // Admin Sipariş Yönetimi
+        Route::get('/admin/orders', [OrderController::class, 'adminIndex']);
+        Route::put('/orders/{order}/status', [OrderController::class, 'updateStatus']);
     });
 });

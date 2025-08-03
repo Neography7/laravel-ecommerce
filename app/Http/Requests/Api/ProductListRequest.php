@@ -4,6 +4,21 @@ namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Ürün Listeleme İsteği
+ *
+ * Ürün listeleme ve filtreleme işlemleri için gelişmiş arama özellikleri sağlar.
+ * Sayfalama, sıralama ve çoklu filtre seçenekleri destekler.
+ *
+ * @property string|null $search Arama terimi (minimum 2 karakter)
+ * @property int|null $category_id Kategori ID'si filtresi
+ * @property float|null $min_price Minimum fiyat filtresi
+ * @property float|null $max_price Maksimum fiyat filtresi
+ * @property bool|null $in_stock Stok durumu filtresi
+ * @property string|null $sort_by Sıralama alanı (name, price, created_at, stock_quantity)
+ * @property string|null $sort_direction Sıralama yönü (asc, desc)
+ * @property int|null $per_page Sayfa başına kayıt sayısı
+ */
 class ProductListRequest extends FormRequest
 {
     /**

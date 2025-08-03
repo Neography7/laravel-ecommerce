@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\UpdateOrderStatusRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Cart;
 use App\Models\Order;
@@ -12,6 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -221,5 +223,173 @@ class OrderController extends Controller
         $order->load(['orderItems.product']);
 
         return new OrderResource($order);
+    }
+
+    /**
+     * Admin: Sipariş Durumu Güncelle
+     *
+     * Admin kullanıcıları sipariş durumunu güncelleyebilir.
+     *
+     * @tags Sipariş Yönetimi
+     * @operationId updateOrderStatus
+     * @summary Sipariş durumunu güncelle (Admin)
+     * @description Bu endpoint ile admin kullanıcıları sipariş durumunu güncelleyebilir.
+     * @authenticated
+     * @security Bearer
+     *
+     * @bodyParam status string required Yeni sipariş durumu. Seçenekler: pending, processing, shipped, delivered, cancelled
+     * @bodyParam note string optional Durum değişikliği ile ilgili not (maksimum 500 karakter)
+     *
+     * @response 200 {
+     *   "success": true,
+     *   "message": "Sipariş durumu başarıyla güncellendi",
+     *   "data": {
+     *     "id": 1,
+     *     "user_id": 1,
+     *     "total_amount": "150.00",
+     *     "status": "shipped",
+     *     "status_label": "Kargoya Verildi",
+     *     "total_items": 3,
+     *     "order_items": [],
+     *     "created_at": "2025-08-02T10:00:00",
+     *     "updated_at": "2025-08-02T10:30:00"
+     *   },
+     *   "errors": null
+     * }
+     *
+     * @response 422 {
+     *   "message": "The given data was invalid.",
+     *   "errors": {
+     *     "status": ["Bu sipariş durumu güncellenemez. Mevcut durum: Teslim Edildi"]
+     *   }
+     * }
+     *
+     * @response 403 {
+     *   "success": false,
+     *   "message": "Bu işlem için admin yetkisi gerekli.",
+     *   "data": null,
+     *   "errors": null
+     * }
+     *
+     * @response 401 {
+     *   "message": "Unauthenticated."
+     * }
+     *
+     * @response 404 {
+     *   "message": "Sipariş bulunamadı."
+     * }
+     */
+    public function updateStatus(UpdateOrderStatusRequest $request, Order $order): JsonResponse
+    {
+        $validated = $request->validated();
+        $oldStatus = $order->status;
+        $newStatus = $validated['status'];
+
+        try {
+            DB::beginTransaction();
+
+            // Sipariş durumunu güncelle
+            $order->update(['status' => $newStatus]);
+
+            // Aktivite log'u ekle
+            Log::info('Admin sipariş durumu güncelledi', [
+                'admin_id' => Auth::id(),
+                'order_id' => $order->id,
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+                'user_id' => $order->user_id,
+            ]);
+
+            DB::commit();
+
+            // Güncellenmiş sipariş verilerini yükle
+            $order->load(['orderItems.product', 'user']);
+
+            return apiSuccess(new OrderResource($order), 'Sipariş durumu başarıyla güncellendi');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Sipariş durumu güncellenirken hata oluştu', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+                'admin_id' => Auth::id(),
+            ]);
+
+            return apiError('Sipariş durumu güncellenirken bir hata oluştu: ' . $e->getMessage(), [], 500);
+        }
+    }
+
+    /**
+     * Admin: Tüm Siparişleri Listele
+     *
+     * Admin kullanıcıları tüm siparişleri görebilir.
+     *
+     * @tags Sipariş Yönetimi
+     * @operationId adminGetAllOrders
+     * @summary Tüm siparişleri listele (Admin)
+     * @description Bu endpoint ile admin kullanıcıları tüm siparişleri listeleyebilir.
+     * @authenticated
+     * @security Bearer
+     *
+     * @queryParam status string Sipariş durumuna göre filtrele
+     * @queryParam user_id integer Kullanıcıya göre filtrele
+     * @queryParam page integer Sayfa numarası
+     * @queryParam per_page integer Sayfa başına sipariş sayısı (maksimum 50)
+     *
+     * @response 200 {
+     *   "success": true,
+     *   "message": "Siparişler başarıyla listelendi",
+     *   "data": {
+     *     "orders": [],
+     *     "pagination": {},
+     *     "filters": {}
+     *   },
+     *   "errors": null
+     * }
+     *
+     * @response 403 {
+     *   "success": false,
+     *   "message": "Bu işlem için admin yetkisi gerekli.",
+     *   "data": null,
+     *   "errors": null
+     * }
+     */
+    public function adminIndex(): JsonResponse
+    {
+        $perPage = min(request('per_page', 15), 50);
+
+        $query = Order::with(['user', 'orderItems.product']);
+
+        // Status filtresi
+        if (request('status') && in_array(request('status'), Order::STATUSES)) {
+            $query->where('status', request('status'));
+        }
+
+        // Kullanıcı filtresi
+        if (request('user_id')) {
+            $query->where('user_id', request('user_id'));
+        }
+
+        // Tarih sıralama (en yeni önce)
+        $query->orderBy('created_at', 'desc');
+
+        $orders = $query->paginate($perPage);
+
+        return apiSuccess([
+            'orders' => OrderResource::collection($orders->items()),
+            'pagination' => [
+                'current_page' => $orders->currentPage(),
+                'per_page' => $orders->perPage(),
+                'total' => $orders->total(),
+                'last_page' => $orders->lastPage(),
+                'from' => $orders->firstItem(),
+                'to' => $orders->lastItem(),
+                'has_more_pages' => $orders->hasMorePages(),
+            ],
+            'filters' => [
+                'status' => request('status'),
+                'user_id' => request('user_id') ? (int)request('user_id') : null,
+            ],
+            'available_statuses' => Order::STATUS_LABELS,
+        ], 'Siparişler başarıyla listelendi');
     }
 }
