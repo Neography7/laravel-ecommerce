@@ -7,6 +7,7 @@ use App\Http\Resources\OrderResource;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Events\OrderCreated;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
@@ -150,6 +151,9 @@ class OrderController extends Controller
             $cart->delete();
 
             DB::commit();
+
+            // Event dispatch - Email gönderimi için
+            OrderCreated::dispatch($order);
 
             return new OrderResource($order->load(['orderItems.product']));
         } catch (\Exception $e) {
