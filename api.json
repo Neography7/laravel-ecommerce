@@ -7,7 +7,12 @@
     },
     "servers": [
         {
-            "url": "http://localhost/api"
+            "url": "http://localhost:8000/api"
+        }
+    ],
+    "security": [
+        {
+            "http": []
         }
     ],
     "paths": {
@@ -87,6 +92,747 @@
                 }
             }
         },
+        "/cart": {
+            "get": {
+                "operationId": "getCart",
+                "description": "Kullan\u0131c\u0131n\u0131n sepetini ve i\u00e7indeki \u00fcr\u00fcnleri getirir.",
+                "summary": "Sepeti G\u00f6r\u00fcnt\u00fcle",
+                "tags": [
+                    "Cart"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "enum": [
+                                        200
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/cart/add": {
+            "post": {
+                "operationId": "addToCart",
+                "description": "Sepete yeni \u00fcr\u00fcn ekler veya mevcut \u00fcr\u00fcn\u00fcn miktar\u0131n\u0131 art\u0131r\u0131r.",
+                "summary": "Sepete \u00dcr\u00fcn Ekle",
+                "tags": [
+                    "Cart"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AddToCartRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "enum": [
+                                        201
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/cart/update": {
+            "put": {
+                "operationId": "updateCartItem",
+                "description": "Sepetteki \u00fcr\u00fcn\u00fcn miktar\u0131n\u0131 g\u00fcnceller.",
+                "summary": "Sepet \u00dcr\u00fcn Miktar\u0131 G\u00fcncelle",
+                "tags": [
+                    "Cart"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateCartRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "enum": [
+                                        200
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/cart/remove/{product}": {
+            "delete": {
+                "operationId": "removeFromCart",
+                "description": "Belirtilen \u00fcr\u00fcn\u00fc sepetten \u00e7\u0131kar\u0131r.\u26a0\ufe0f Cannot generate request documentation: SQLSTATE[08006] [7] could not translate host name \"postgres\" to address: nodename nor servname provided, or not known",
+                "summary": "Sepetten \u00dcr\u00fcn \u00c7\u0131kar",
+                "tags": [
+                    "Cart"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "enum": [
+                                        200
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/cart/clear": {
+            "delete": {
+                "operationId": "clearCart",
+                "description": "Sepetteki t\u00fcm \u00fcr\u00fcnleri temizler.",
+                "summary": "Sepeti Temizle",
+                "tags": [
+                    "Cart"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "enum": [
+                                        200
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/categories": {
+            "get": {
+                "operationId": "getCategories",
+                "description": "T\u00fcm kategorileri listeler.",
+                "summary": "Kategori Listesi",
+                "tags": [
+                    "Category"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "enum": [
+                                        200
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "operationId": "createCategory",
+                "description": "Yeni bir kategori olu\u015fturur.",
+                "summary": "Kategori Olu\u015fturma",
+                "tags": [
+                    "Category"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreCategoryRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "enum": [
+                                        201
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/categories/{category}": {
+            "get": {
+                "operationId": "getCategoryById",
+                "description": "Belirli bir kategorinin detay\u0131n\u0131 g\u00f6sterir.\u26a0\ufe0f Cannot generate request documentation: SQLSTATE[08006] [7] could not translate host name \"postgres\" to address: nodename nor servname provided, or not known",
+                "summary": "Kategori Detay\u0131",
+                "tags": [
+                    "Category"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "enum": [
+                                        200
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "operationId": "updateCategory",
+                "description": "Mevcut bir kategoriyi g\u00fcnceller.\u26a0\ufe0f Cannot generate request documentation: SQLSTATE[08006] [7] could not translate host name \"postgres\" to address: nodename nor servname provided, or not known",
+                "summary": "Kategori G\u00fcncelleme",
+                "tags": [
+                    "Category"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "enum": [
+                                        200
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "deleteCategory",
+                "description": "Mevcut bir kategoriyi siler.\u26a0\ufe0f Cannot generate request documentation: SQLSTATE[08006] [7] could not translate host name \"postgres\" to address: nodename nor servname provided, or not known",
+                "summary": "Kategori Silme",
+                "tags": [
+                    "Category"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "enum": [
+                                        200
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/dashboard": {
+            "get": {
+                "operationId": "getDashboardStats",
+                "description": "Admin dashboard i\u00e7in temel istatistikleri getirir. Laravel 12 Concurrency kullanarak\nbirden fazla veriyi paralel olarak \u00e7eker ve performansl\u0131 bir dashboard sa\u011flar.",
+                "summary": "Dashboard \u0130statistikleri",
+                "tags": [
+                    "Dashboard"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "enum": [
+                                        200
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/orders": {
+            "get": {
+                "operationId": "getOrders",
+                "description": "Kullan\u0131c\u0131n\u0131n t\u00fcm sipari\u015flerini getirir.",
+                "summary": "Sipari\u015fleri Listele",
+                "tags": [
+                    "Order"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "enum": [
+                                        200
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "createOrder",
+                "description": "Kullan\u0131c\u0131n\u0131n sepetindeki \u00fcr\u00fcnlerden yeni bir sipari\u015f olu\u015fturur.",
+                "summary": "Sipari\u015f Olu\u015ftur",
+                "tags": [
+                    "Order"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "enum": [
+                                        201
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/orders/{order}": {
+            "get": {
+                "operationId": "getOrder",
+                "description": "Belirtilen sipari\u015fin detaylar\u0131n\u0131 getirir.\u26a0\ufe0f Cannot generate request documentation: SQLSTATE[08006] [7] could not translate host name \"postgres\" to address: nodename nor servname provided, or not known",
+                "summary": "Sipari\u015f Detay\u0131",
+                "tags": [
+                    "Order"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "enum": [
+                                        200
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/admin/orders": {
+            "get": {
+                "operationId": "adminGetAllOrders",
+                "description": "Admin kullan\u0131c\u0131lar\u0131 t\u00fcm sipari\u015fleri g\u00f6rebilir.",
+                "summary": "T\u00fcm Sipari\u015fleri Listele",
+                "tags": [
+                    "Order"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "enum": [
+                                        200
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/orders/{order}/status": {
+            "put": {
+                "operationId": "updateOrderStatus",
+                "description": "Admin kullan\u0131c\u0131lar\u0131 sipari\u015f durumunu g\u00fcncelleyebilir.\u26a0\ufe0f Cannot generate request documentation: SQLSTATE[08006] [7] could not translate host name \"postgres\" to address: nodename nor servname provided, or not known",
+                "summary": "Sipari\u015f Durumu G\u00fcncelle",
+                "tags": [
+                    "Order"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "enum": [
+                                        200
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/products": {
+            "get": {
+                "operationId": "getProducts",
+                "description": "Sistemdeki \u00fcr\u00fcnleri geli\u015fmi\u015f arama, filtreleme ve sayfalama \u00f6zellikleri ile listeler.",
+                "summary": "\u00dcr\u00fcn Listesi",
+                "tags": [
+                    "Product"
+                ],
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "minLength": 2,
+                            "maxLength": 100
+                        }
+                    },
+                    {
+                        "name": "category_id",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "min_price",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "number",
+                                "null"
+                            ],
+                            "minimum": 0
+                        }
+                    },
+                    {
+                        "name": "max_price",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "number",
+                                "null"
+                            ],
+                            "minimum": 0
+                        }
+                    },
+                    {
+                        "name": "in_stock",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "boolean",
+                                "null"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "sort_by",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "enum": [
+                                "name",
+                                "price",
+                                "created_at",
+                                "stock_quantity"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "sort_order",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1,
+                            "maximum": 50
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "enum": [
+                                        200
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "createProduct",
+                "description": "Yeni bir \u00fcr\u00fcn kayd\u0131 olu\u015fturur. Sadece admin kullan\u0131c\u0131lar eri\u015febilir.",
+                "summary": "\u00dcr\u00fcn Olu\u015fturma",
+                "tags": [
+                    "Product"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreProductRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "enum": [
+                                        201
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/products/{product}": {
+            "get": {
+                "operationId": "getProduct",
+                "description": "Belirtilen \u00fcr\u00fcn\u00fcn detaylar\u0131n\u0131 getirir. Misafir kullan\u0131c\u0131lar da eri\u015febilir.\u26a0\ufe0f Cannot generate request documentation: SQLSTATE[08006] [7] could not translate host name \"postgres\" to address: nodename nor servname provided, or not known",
+                "summary": "\u00dcr\u00fcn Detay\u0131",
+                "tags": [
+                    "Product"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "operationId": "updateProduct",
+                "description": "Mevcut bir \u00fcr\u00fcn\u00fc g\u00fcnceller. Sadece admin kullan\u0131c\u0131lar eri\u015febilir.\u26a0\ufe0f Cannot generate request documentation: SQLSTATE[08006] [7] could not translate host name \"postgres\" to address: nodename nor servname provided, or not known",
+                "summary": "\u00dcr\u00fcn G\u00fcncelleme",
+                "tags": [
+                    "Product"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "enum": [
+                                        200
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "destroyProduct",
+                "description": "Mevcut bir \u00fcr\u00fcn\u00fc siler. Sadece admin kullan\u0131c\u0131lar eri\u015febilir.\u26a0\ufe0f Cannot generate request documentation: SQLSTATE[08006] [7] could not translate host name \"postgres\" to address: nodename nor servname provided, or not known",
+                "summary": "\u00dcr\u00fcn Silme",
+                "tags": [
+                    "Product"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "enum": [
+                                        200
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/profile": {
             "get": {
                 "operationId": "getUserProfile",
@@ -155,7 +901,31 @@
         }
     },
     "components": {
+        "securitySchemes": {
+            "http": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        },
         "schemas": {
+            "AddToCartRequest": {
+                "type": "object",
+                "description": "Sepete \u00dcr\u00fcn Ekleme \u0130ste\u011fi",
+                "properties": {
+                    "product_id": {
+                        "type": "integer"
+                    },
+                    "quantity": {
+                        "type": "integer",
+                        "minimum": 1
+                    }
+                },
+                "required": [
+                    "product_id",
+                    "quantity"
+                ],
+                "title": "AddToCartRequest"
+            },
             "LoginRequest": {
                 "type": "object",
                 "description": "Kullan\u0131c\u0131 Giri\u015f \u0130ste\u011fi",
@@ -204,6 +974,80 @@
                     "password_confirmation"
                 ],
                 "title": "RegisterRequest"
+            },
+            "StoreCategoryRequest": {
+                "type": "object",
+                "description": "Kategori Olu\u015fturma \u0130ste\u011fi",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 255
+                    },
+                    "description": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 1000
+                    }
+                },
+                "required": [
+                    "name"
+                ],
+                "title": "StoreCategoryRequest"
+            },
+            "StoreProductRequest": {
+                "type": "object",
+                "description": "\u00dcr\u00fcn Olu\u015fturma \u0130ste\u011fi",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 255
+                    },
+                    "description": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "price": {
+                        "type": "number"
+                    },
+                    "stock_quantity": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "category_id": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "name",
+                    "price",
+                    "stock_quantity",
+                    "category_id"
+                ],
+                "title": "StoreProductRequest"
+            },
+            "UpdateCartRequest": {
+                "type": "object",
+                "description": "Sepet G\u00fcncelleme \u0130ste\u011fi",
+                "properties": {
+                    "product_id": {
+                        "type": "integer"
+                    },
+                    "quantity": {
+                        "type": "integer",
+                        "minimum": 1
+                    }
+                },
+                "required": [
+                    "product_id",
+                    "quantity"
+                ],
+                "title": "UpdateCartRequest"
             },
             "UpdateProfileRequest": {
                 "type": "object",
@@ -267,6 +1111,25 @@
             },
             "AuthenticationException": {
                 "description": "Unauthenticated",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
+            },
+            "AuthorizationException": {
+                "description": "Authorization error",
                 "content": {
                     "application/json": {
                         "schema": {

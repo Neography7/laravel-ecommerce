@@ -226,7 +226,7 @@ class OrderController extends Controller
     }
 
     /**
-     * Admin: Sipariş Durumu Güncelle
+     * Sipariş Durumu Güncelle
      *
      * Admin kullanıcıları sipariş durumunu güncelleyebilir.
      *
@@ -319,7 +319,7 @@ class OrderController extends Controller
     }
 
     /**
-     * Admin: Tüm Siparişleri Listele
+     * Tüm Siparişleri Listele
      *
      * Admin kullanıcıları tüm siparişleri görebilir.
      *
